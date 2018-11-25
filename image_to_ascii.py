@@ -1,8 +1,7 @@
 """
 Image to ASCII
 
-Description: Accepts image file. Converts image to array of ascii characters based on the amount of
-white and black space.
+Description: Accepts image file named "input.png". Outputs array of ascii characters to "output.txt"
 
 Author: Nic La
 Last modified: Nov 2018
