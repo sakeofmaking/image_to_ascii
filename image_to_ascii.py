@@ -1,16 +1,21 @@
 """
 Image to ASCII
 
-Description: Accepts image file named "input.png". Outputs array of ascii characters to "output.txt"
+Description: Accepts image file of type .jpg, .png. Converts image to array of ascii characters based on the amount of
+white and black space.
 
 Author: Nic La
-Last modified: Nov 2018
+Last modified: Feb 2020
 """
 
 from PIL import Image
 import numpy as np
 
 np.set_printoptions(threshold=np.nan)   # prints all char
+
+image_file = 'input.png'
+const_white_filter = 1  # 100/(max white content in char), filter constant to better fit white content in ascii_table
+const_black_filter = 2.86  # 100/(max black content in char), filter constant to better fit black in ascii_table
 
 
 # accepts a (black, white) and returns the a best fit char
@@ -46,30 +51,29 @@ def best_fit_ascii(black, white):
 def image_to_array(image_name):
     im = Image.open(image_name)
     im_array = np.asarray(im)       # creates an array of (height, width) of RGB values, one for each pixel
+    # DEBUG: print(im_array)
 
-    # print(im_array)
     # convert a (255, 255, 255) array to (black, white) array
     # 255 + 255 + 255 = 765 = percent_white
-
     num_array = []
     for a in range(len(im_array)):
         num_array.append([])
         for b in range(len(im_array[a])):
-            # print(int(im_array[a][b][0]) + int(im_array[a][b][1]) + int(im_array[a][b][2]))
+            # num_array[a].append(int(im_array[a][b]) + int(im_array[a][b]) + int(im_array[a][b]))
             num_array[a].append(int(im_array[a][b][0]) + int(im_array[a][b][1]) + int(im_array[a][b][2]))
     return num_array
 
 
 # Main Function
 if __name__ == '__main__':
-    num_array = image_to_array('input.png')
+    num_array = image_to_array(image_file)
 
     ascii_array = []
     for count, x in enumerate(num_array):
         ascii_array.append([])
         for y in x:
-            white = int((y / 765) * 100)
-            black = 100 - white
+            white = int((y / 765) * 100) / const_white_filter  # converts white content to a percentage
+            black = (100 - white) / const_black_filter  # converts black content to a percentage
             ascii_array[count].append(best_fit_ascii(black, white))
 
     text_file = open('output.txt', 'w')
@@ -79,11 +83,34 @@ if __name__ == '__main__':
         text_file.write('\n')
     text_file.close()
 
+    # DEBUG: determine white percentage of image
+    # total_white = 0
+    # for count, x in enumerate(num_array):
+    #     total_white += sum(num_array[count])
+    # print((total_white / (765*10000)) * 100)
+
 '''
-    # determine white percentage of image
-    total_white = 0
-    for count, x in enumerate(num_array):
-        total_white += sum(num_array[count])
-    print((total_white / (765*10000)) * 100)
-   
+                                        ..        
+                                   ..,,...,       
+                                .,. .... ,.       
+                               ,....... .,        
+                    .        .! ., .....L,        
+                   !.      .,,....!.  ,,.,        
+            .,.     !!,.  !,  ,...   ...,         
+             .D.     .LQZX, ..,....,  ..          
+              ,IWDLTTL!STT!!L,........            
+    .,..  ..   LDWQ8XDWQQQQQQQQDIITLLT!.          
+        ..,!SQQQXXWDWXOQQQQQQQQQQQQXSSVOW5,       
+           RQQQQXSSTOXIXQQQQQQQQQQQXSSIVQQQW.     
+          ,QQQQQDS5TXRS5QQQQQQQQQQQZ!!!LQQQQQL    
+   .,,,,,,,,!QQQQQW5SZVVXQQQQQQQQQQQT,,LWQQQXDS   
+              .,!,XQWRD5JX!.......,!,..,LRQWYJO   
+               ,LRRLJIDQQQQO!..,....,,...,,!LIJ   
+            ,LLL!,     ,TDQQQ8,.,,. .......!,J.   
+          LXV!            XWL..,,. .  ... ..L.    
+        .J.               .WY    ,,. ...  ..,T.   
+                          LQL      ....... . ,!   
+                         .QZ.            ....,.   
+                          I                       
+                          .                                                                    
 '''
